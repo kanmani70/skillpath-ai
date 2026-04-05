@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkillPath AI</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <style>
+    .hero {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .hero-card {
+      background: white;
+      border-radius: 20px;
+      padding: 50px 40px;
+      width: 100%;
+      max-width: 580px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .hero-card h1 {
+      font-size: 36px;
+      color: #2d3a8c;
+      margin-bottom: 10px;
+    }
+    .hero-card h1 span {
+      color: #00c896;
+    }
+    .hero-card .subtitle {
+      font-size: 15px;
+      color: #888;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    .upload-box {
+      border: 2px dashed #2d3a8c;
+      border-radius: 12px;
+      padding: 35px 20px;
+      background: #f8f9ff;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: background 0.2s;
+    }
+    .upload-box:hover {
+      background: #eef0ff;
+    }
+    .upload-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    .upload-box p {
+      color: #2d3a8c;
+      font-size: 14px;
+      margin: 0;
+    }
+    .upload-box .small {
+      color: #aaa;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    #fileInput { display: none; }
+    .file-name {
+      font-size: 13px;
+      color: #00c896;
+      margin-bottom: 10px;
+    }
+    .job-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e0e4f0;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 16px;
+      background: white;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    .feature-item {
+      background: #f8f9ff;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: left;
+    }
+    .feature-item .icon {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    .feature-item p {
+      font-size: 12px;
+      color: #555;
+      margin: 0;
+    }
+    .feature-item h4 {
+      font-size: 13px;
+      color: #2d3a8c;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <a href="/" class="logo">SkillPath <span>AI</span></a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+    </div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <div class="hero">
+    <div class="hero-card">
+
+      <h1>SkillPath <span>AI</span></h1>
+      <p class="subtitle">
+        Upload your resume → AI analyzes your skills →
+        Get your personalized day-by-day job-ready roadmap
+      </p>
+
+      <!-- TARGET JOB SELECTION -->
+      <select class="job-select" id="targetJob">
+  <option value="">Select your target job role</option>
+
+  <!-- ENGINEERING / CS / IT -->
+  <optgroup label="💻 Engineering & IT">
+    <option value="Software Developer">Software Developer</option>
+    <option value="Frontend Developer">Frontend Developer</option>
+    <option value="Backend Developer">Backend Developer</option>
+    <option value="Full Stack Developer">Full Stack Developer</option>
+    <option value="Python Developer">Python Developer</option>
+    <option value="Java Developer">Java Developer</option>
+    <option value="Web Developer">Web Developer</option>
+    <option value="Software Tester">Software Tester</option>
+    <option value="Data Analyst">Data Analyst</option>
+    <option value="DevOps Engineer">DevOps Engineer</option>
+    <option value="Android Developer">Android Developer</option>
+    <option value="UI UX Designer">UI UX Designer</option>
+  </optgroup>
+
+  <!-- BCA / BSC -->
+  <optgroup label="🖥️ BCA / BSc Computer Science">
+    <option value="Junior Web Developer">Junior Web Developer</option>
+    <option value="Software Trainee">Software Trainee</option>
+    <option value="Junior Tester">Junior Tester</option>
+    <option value="Technical Support Engineer">Technical Support Engineer</option>
+    <option value="System Administrator">System Administrator</option>
+    <option value="Database Administrator">Database Administrator</option>
+  </optgroup>
+
+  <!-- BCOM / BBA -->
+  <optgroup label="📊 BCom / BBA / MBA">
+    <option value="Accountant">Accountant</option>
+    <option value="Financial Analyst">Financial Analyst</option>
+    <option value="Business Analyst">Business Analyst</option>
+    <option value="HR Executive">HR Executive</option>
+    <option value="Marketing Executive">Marketing Executive</option>
+    <option value="Sales Executive">Sales Executive</option>
+    <option value="Operations Executive">Operations Executive</option>
+    <option value="Banking Executive">Banking Executive</option>
+    <option value="Tax Consultant">Tax Consultant</option>
+  </optgroup>
+
+  <!-- ARTS / HUMANITIES -->
+  <optgroup label="✍️ Arts / Humanities">
+    <option value="Content Writer">Content Writer</option>
+    <option value="Digital Marketing Executive">Digital Marketing Executive</option>
+    <option value="Social Media Manager">Social Media Manager</option>
+    <option value="Graphic Designer">Graphic Designer</option>
+    <option value="SEO Analyst">SEO Analyst</option>
+    <option value="PR Executive">PR Executive</option>
+  </optgroup>
+
+  <!-- ECE / EEE -->
+  <optgroup label="⚡ ECE / EEE / Mechanical">
+    <option value="Embedded Systems Engineer">Embedded Systems Engineer</option>
+    <option value="IoT Developer">IoT Developer</option>
+    <option value="Hardware Engineer">Hardware Engineer</option>
+    <option value="Electrical Engineer">Electrical Engineer</option>
+    <option value="Mechanical Engineer">Mechanical Engineer</option>
+    <option value="AutoCAD Designer">AutoCAD Designer</option>
+  </optgroup>
+
+</select>
+
+      <!-- UPLOAD BOX -->
+      <div class="upload-box"
+           onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📄</div>
+        <p>Click here to upload your resume</p>
+        <p class="small">Supports PDF format only</p>
+        <input type="file"
+               id="fileInput"
+               accept=".pdf"
+               onchange="showFileName(this)"/>
+      </div>
+
+      <!-- FILE NAME -->
+      <div class="file-name" id="fileName"></div>
+
+      <!-- ANALYZE BUTTON -->
+      <button class="btn btn-full" onclick="analyzeResume()">
+        Analyze My Resume →
+      </button>
+
+      <!-- FEATURES GRID -->
+      <div class="features">
+        <div class="feature-item">
+          <div class="icon">🤖</div>
+          <h4>AI Analysis</h4>
+          <p>Claude AI reads your resume instantly</p>
+        </div>
+        <div class="feature-item">
+          <div class="icon">📊</div>
+          <h4>Skill Gap</h4>
+          <p>See exactly what skills you're missing</p>
+        </div>
+        <div class="feature-item">
+          <div class="icon">🗺️</div>
+          <h4>Roadmap</h4>
+          <p>Day-by-day learning plan with free resources</p>
+        </div>
+        <div class="feature-item">
+          <div class="icon">🎤</div>
+          <h4>Mock Interview</h4>
+          <p>Practice with AI voice interview coach</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function showFileName(input) {
+      var fileName = input.files[0].name;
+      document.getElementById('fileName').textContent
+        = '✓ Selected: ' + fileName;
+    }
+
+    function analyzeResume() {
+      var fileInput = document.getElementById('fileInput');
+      var targetJob = document.getElementById('targetJob').value;
+
+      if (fileInput.files.length === 0) {
+        alert('Please select your resume first!');
+        return;
+      }
+
+      if (targetJob === '') {
+        alert('Please select your target job role!');
+        return;
+      }
+
+      var btn = document.querySelector('.btn');
+      btn.textContent = 'Analyzing with AI... please wait';
+      btn.style.background = '#00c896';
+      btn.disabled = true;
+
+      var formData = new FormData();
+      formData.append('resume', fileInput.files[0]);
+      formData.append('target_job', targetJob);
+
+      fetch('/analyze', {
+        method: 'POST',
+        body: formData
+      })
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(data) {
+        // Save analysis data to localStorage
+        localStorage.setItem('analysisData', JSON.stringify(data));
+        localStorage.setItem('targetJob', targetJob);
+        // Go to analysis page
+        window.location.href = '/analysis';
+      })
+      .catch(function(error) {
+        alert('Error analyzing resume. Please try again.');
+        btn.textContent = 'Analyze My Resume →';
+        btn.style.background = '#2d3a8c';
+        btn.disabled = false;
+      });
+    }
+  </script>
+
+</body>
+</html>

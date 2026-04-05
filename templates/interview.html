@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interview Practice — SkillPath AI</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <style>
+    .answer-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #2d3a8c;
+      background: white;
+      color: #2d3a8c;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .tab-btn.active {
+      background: #2d3a8c;
+      color: white;
+    }
+    .code-editor {
+      width: 100%;
+      min-height: 150px;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      border: none;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .code-editor:focus {
+      outline: 2px solid #2d3a8c;
+    }
+    .better-answer-box {
+      background: #f8f9ff;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.7;
+      font-style: italic;
+    }
+    .score-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="/" class="logo">SkillPath <span>AI</span></a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/roadmap-page">Roadmap</a>
+      <a href="/interview-page">Interview</a>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="card" style="text-align:center;">
+      <h2>🎤 AI Mock Interview Coach</h2>
+      <p style="color:#888;font-size:14px;">
+        Answer questions by voice or text — AI gives honest feedback
+      </p>
+      <p style="color:#2d3a8c;font-size:13px;margin-top:8px;">
+        Target Role: <strong id="targetJobTitle"></strong>
+      </p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="number" id="questionCount">0</div>
+        <div class="label">Questions Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="avgScore">—</div>
+        <div class="label">Average Score</div>
+      </div>
+    </div>
+
+    <!-- QUESTION -->
+    <div class="card">
+      <div class="section-title">💬 Interview Question</div>
+      <div class="question-box" id="questionBox">
+        Click "Start Interview" to begin
+      </div>
+      <div style="text-align:center;margin-top:10px;">
+        <span id="questionType" style="background:#e8f0ff;
+        color:#2d3a8c;padding:4px 12px;border-radius:20px;
+        font-size:12px;display:none;"></span>
+      </div>
+    </div>
+
+    <!-- ANSWER SECTION -->
+    <div class="card" id="answerSection" style="display:none;">
+      <div class="section-title">✍️ Your Answer</div>
+
+      <!-- TABS -->
+      <div class="answer-tabs">
+        <button class="tab-btn active" id="voiceTab"
+        onclick="switchTab('voice')">🎤 Voice</button>
+        <button class="tab-btn" id="typeTab"
+        onclick="switchTab('type')">⌨️ Type</button>
+        <button class="tab-btn" id="codeTab"
+        onclick="switchTab('code')">💻 Code</button>
+      </div>
+
+      <!-- VOICE TAB -->
+      <div id="voicePanel">
+        <div style="text-align:center;padding:20px;">
+          <button class="mic-btn" id="micBtn"
+          onclick="toggleRecording()">🎤</button>
+          <p id="micStatus" style="color:#888;font-size:14px;
+          margin-top:10px;">Press mic and speak your answer</p>
+          <p style="color:#aaa;font-size:12px;">
+            Tip: Speak for as long as you need — mic stays on
+          </p>
+        </div>
+        <div id="transcriptBox" style="display:none;
+        background:#f8f9ff;border-radius:12px;padding:16px;margin-top:8px;">
+          <p style="font-size:12px;color:#888;margin-bottom:6px;">
+            Your spoken answer:</p>
+          <p id="transcriptText" style="font-size:14px;
+          color:#333;line-height:1.6;margin:0;"></p>
+        </div>
+      </div>
+
+      <!-- TYPE TAB -->
+      <div id="typePanel" style="display:none;">
+        <textarea id="typeAnswer"
+        placeholder="Type your answer here in detail..."
+        style="width:100%;padding:14px;border:1px solid #e0e4f0;
+        border-radius:10px;font-size:14px;min-height:120px;
+        font-family:Arial,sans-serif;line-height:1.6;
+        resize:vertical;"></textarea>
+      </div>
+
+      <!-- CODE TAB -->
+      <div id="codePanel" style="display:none;">
+        <p style="font-size:13px;color:#888;margin-bottom:8px;">
+          Write your code below:
+        </p>
+        <textarea class="code-editor" id="codeAnswer"
+        placeholder="# Write your code here
+def solution():
+    pass"></textarea>
+        <p style="font-size:12px;color:#aaa;margin-top:6px;">
+          Also explain your logic below:
+        </p>
+        <textarea id="codeExplanation"
+        placeholder="Explain your code logic here..."
+        style="width:100%;padding:14px;border:1px solid #e0e4f0;
+        border-radius:10px;font-size:14px;min-height:80px;
+        font-family:Arial,sans-serif;margin-top:8px;
+        resize:vertical;"></textarea>
+      </div>
+
+      <!-- SUBMIT BUTTON -->
+      <div style="text-align:center;margin-top:16px;">
+        <button class="btn btn-green" id="submitBtn"
+        onclick="submitAnswer()">
+          Get AI Feedback →
+        </button>
+      </div>
+    </div>
+
+    <!-- START / NEXT BUTTONS -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <button class="btn" id="startBtn" onclick="startInterview()">
+        🚀 Start Interview
+      </button>
+      <button class="btn" id="nextBtn"
+      onclick="nextQuestion()" style="display:none;
+      background:#6c5ce7;">
+        Next Question →
+      </button>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div class="card" id="feedbackBox" style="display:none;
+    border-left:4px solid #00c896;">
+
+      <div style="display:flex;justify-content:space-between;
+      align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <h4 style="margin:0;color:#2d3a8c;font-size:18px;">
+          AI Feedback
+        </h4>
+        <div class="score-circle" id="scoreCircle">
+          <span id="scoreValue">0</span>
+          <span style="font-size:11px;font-weight:400;">/10</span>
+        </div>
+      </div>
+
+      <!-- SCORE BAR -->
+      <div style="margin-bottom:16px;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="scoreBar"
+          style="width:0%;"></div>
+        </div>
+        <p id="scoreMessage" style="font-size:13px;
+        color:#888;margin-top:6px;text-align:center;"></p>
+      </div>
+
+      <!-- GOOD -->
+      <div style="background:#f0fff8;border-radius:10px;
+      padding:16px;margin-bottom:14px;">
+        <p style="font-size:13px;font-weight:500;color:#00875a;
+        margin-bottom:10px;">✅ What was good:</p>
+        <div id="goodPoints"></div>
+      </div>
+
+      <!-- IMPROVE -->
+      <div style="background:#fff5f5;border-radius:10px;
+      padding:16px;margin-bottom:14px;">
+        <p style="font-size:13px;font-weight:500;color:#e05555;
+        margin-bottom:10px;">⚠️ What to improve:</p>
+        <div id="improvePoints"></div>
+      </div>
+
+      <!-- BETTER ANSWER -->
+      <div style="margin-bottom:14px;">
+        <p style="font-size:13px;font-weight:500;color:#2d3a8c;
+        margin-bottom:10px;">💡 Better answer example:</p>
+        <div class="better-answer-box" id="betterAnswer"></div>
+      </div>
+
+      <!-- TIP -->
+      <div id="tipBox" style="background:#fff8e0;
+      border-radius:10px;padding:14px;display:none;">
+        <p style="font-size:13px;color:#b07d00;margin:0;">
+          🌟 Tip: <span id="tipText"></span>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM BUTTONS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;
+    gap:16px;margin-bottom:40px;">
+      <a href="/" class="btn" style="text-align:center;">
+        ← Back to Home
+      </a>
+      <a href="/roadmap-page" class="btn btn-green"
+      style="text-align:center;">
+        View Roadmap →
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    var targetJob = localStorage.getItem('targetJob')
+      || 'Software Developer';
+    var currentQuestion = '';
+    var questionCount = 0;
+    var totalScore = 0;
+    var isRecording = false;
+    var recognition = null;
+    var userAnswer = '';
+    var currentTab = 'voice';
+    var askedQuestions = [];
+
+    document.getElementById('targetJobTitle').textContent = targetJob;
+
+    // Setup Speech Recognition
+    function setupSpeech() {
+      if ('webkitSpeechRecognition' in window ||
+          'SpeechRecognition' in window) {
+        var SR = window.SpeechRecognition
+          || window.webkitSpeechRecognition;
+        recognition = new SR();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN';
+
+        recognition.onresult = function(event) {
+          var transcript = '';
+          for (var i = 0; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          userAnswer = transcript;
+          document.getElementById('transcriptText')
+            .textContent = transcript;
+          document.getElementById('transcriptBox')
+            .style.display = 'block';
+        };
+
+        recognition.onerror = function(event) {
+          if (event.error !== 'no-speech') {
+            document.getElementById('micStatus').textContent
+              = 'Error: ' + event.error + '. Try typing instead.';
+            stopRecording();
+          }
+        };
+
+        recognition.onend = function() {
+          if (isRecording) {
+            try { recognition.start(); } catch(e) {}
+          }
+        };
+      }
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('voicePanel').style.display
+        = tab === 'voice' ? 'block' : 'none';
+      document.getElementById('typePanel').style.display
+        = tab === 'type' ? 'block' : 'none';
+      document.getElementById('codePanel').style.display
+        = tab === 'code' ? 'block' : 'none';
+
+      document.getElementById('voiceTab').className
+        = 'tab-btn' + (tab === 'voice' ? ' active' : '');
+      document.getElementById('typeTab').className
+        = 'tab-btn' + (tab === 'type' ? ' active' : '');
+      document.getElementById('codeTab').className
+        = 'tab-btn' + (tab === 'code' ? ' active' : '');
+    }
+
+    function startInterview() {
+      document.getElementById('startBtn').style.display = 'none';
+      fetchNextQuestion();
+    }
+
+    function fetchNextQuestion() {
+      document.getElementById('questionBox').textContent
+        = '⏳ Loading question...';
+      document.getElementById('feedbackBox').style.display = 'none';
+      document.getElementById('answerSection').style.display = 'none';
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('questionType').style.display = 'none';
+      document.getElementById('transcriptBox').style.display = 'none';
+      document.getElementById('typeAnswer') &&
+        (document.getElementById('typeAnswer').value = '');
+      document.getElementById('codeAnswer') &&
+        (document.getElementById('codeAnswer').value = '');
+      document.getElementById('codeExplanation') &&
+        (document.getElementById('codeExplanation').value = '');
+      userAnswer = '';
+      if (isRecording) stopRecording();
+
+      fetch('/next-question', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          target_job: targetJob,
+          asked_questions: askedQuestions
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        currentQuestion = data.question;
+        askedQuestions.push(currentQuestion);
+
+        document.getElementById('questionBox')
+          .textContent = currentQuestion;
+        document.getElementById('questionType').textContent
+          = data.type || 'HR';
+        document.getElementById('questionType')
+          .style.display = 'inline-block';
+        document.getElementById('answerSection')
+          .style.display = 'block';
+
+        speakText(currentQuestion);
+      })
+      .catch(function() {
+        currentQuestion = 'Tell me about yourself.';
+        document.getElementById('questionBox')
+          .textContent = currentQuestion;
+        document.getElementById('answerSection')
+          .style.display = 'block';
+        speakText(currentQuestion);
+      });
+    }
+
+    function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function startRecording() {
+      if (!recognition) {
+        alert('Voice not supported. Please use Chrome or switch to Type tab.');
+        return;
+      }
+      isRecording = true;
+      userAnswer = '';
+      try { recognition.start(); } catch(e) {}
+      document.getElementById('micBtn').classList.add('recording');
+      document.getElementById('micStatus').textContent
+        = '🔴 Recording... speak your full answer then click mic to stop';
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      try { recognition.stop(); } catch(e) {}
+      document.getElementById('micBtn').classList.remove('recording');
+      document.getElementById('micStatus').textContent
+        = 'Press mic to speak your answer';
+    }
+
+    function getAnswer() {
+      if (currentTab === 'voice') {
+        return userAnswer;
+      } else if (currentTab === 'type') {
+        return document.getElementById('typeAnswer').value;
+      } else if (currentTab === 'code') {
+        var code = document.getElementById('codeAnswer').value;
+        var explanation = document.getElementById('codeExplanation').value;
+        return 'Code: ' + code + '\nExplanation: ' + explanation;
+      }
+      return '';
+    }
+
+    function submitAnswer() {
+      var answer = getAnswer();
+
+      if (!answer || answer.trim() === '' ||
+          answer === 'Code: \nExplanation: ') {
+        alert('Please give your answer first!');
+        return;
+      }
+
+      if (isRecording) stopRecording();
+
+      var btn = document.getElementById('submitBtn');
+      btn.textContent = '⏳ Getting feedback...';
+      btn.disabled = true;
+
+      fetch('/interview', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          question: currentQuestion,
+          answer: answer
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        displayFeedback(data);
+        questionCount++;
+        totalScore += (data.score || 0);
+        document.getElementById('questionCount')
+          .textContent = questionCount;
+        var avg = Math.round(totalScore / questionCount);
+        document.getElementById('avgScore').textContent = avg;
+        btn.textContent = 'Get AI Feedback →';
+        btn.disabled = false;
+        document.getElementById('nextBtn').style.display
+          = 'inline-block';
+      })
+      .catch(function() {
+        alert('Error. Please try again.');
+        btn.textContent = 'Get AI Feedback →';
+        btn.disabled = false;
+      });
+    }
+
+    function displayFeedback(data) {
+      document.getElementById('feedbackBox').style.display = 'block';
+
+      var score = data.score || 0;
+      document.getElementById('scoreValue').textContent = score;
+
+      var circle = document.getElementById('scoreCircle');
+      var bar = document.getElementById('scoreBar');
+      bar.style.width = (score * 10) + '%';
+
+      if (score >= 8) {
+        circle.style.background = '#00c896';
+        bar.style.background = '#00c896';
+        document.getElementById('scoreMessage').textContent
+          = '🌟 Excellent answer!';
+      } else if (score >= 6) {
+        circle.style.background = '#f0a500';
+        bar.style.background = '#f0a500';
+        document.getElementById('scoreMessage').textContent
+          = '👍 Good — keep improving!';
+      } else if (score >= 4) {
+        circle.style.background = '#e05555';
+        bar.style.background = '#e05555';
+        document.getElementById('scoreMessage').textContent
+          = '📚 Needs improvement — study the better answer below';
+      } else {
+        circle.style.background = '#c0392b';
+        bar.style.background = '#c0392b';
+        document.getElementById('scoreMessage').textContent
+          = '❌ Very poor — please review and try again';
+      }
+
+      var goodHtml = '';
+      (data.good_points || []).forEach(function(p) {
+        goodHtml += '<p style="font-size:13px;color:#333;' +
+          'margin-bottom:8px;">• ' + p + '</p>';
+      });
+      document.getElementById('goodPoints').innerHTML = goodHtml;
+
+      var improveHtml = '';
+      (data.improve_points || []).forEach(function(p) {
+        improveHtml += '<p style="font-size:13px;color:#333;' +
+          'margin-bottom:8px;">• ' + p + '</p>';
+      });
+      document.getElementById('improvePoints').innerHTML = improveHtml;
+
+      document.getElementById('betterAnswer').textContent
+        = data.better_answer || '';
+
+      if (data.tip) {
+        document.getElementById('tipText').textContent = data.tip;
+        document.getElementById('tipBox').style.display = 'block';
+      }
+
+      document.getElementById('feedbackBox')
+        .scrollIntoView({behavior: 'smooth'});
+
+      speakText('You scored ' + score + ' out of 10.');
+    }
+
+    function nextQuestion() {
+      fetchNextQuestion();
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        var utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-IN';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    setupSpeech();
+  </script>
+
+</body>
+</html>

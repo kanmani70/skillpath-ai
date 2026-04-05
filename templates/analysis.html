@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analysis — SkillPath AI</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <a href="/" class="logo">SkillPath <span>AI</span></a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/roadmap-page">Roadmap</a>
+      <a href="/interview-page">Interview</a>
+    </div>
+  </div>
+
+  <!-- LOADING SCREEN -->
+  <div id="loadingScreen" class="page">
+    <div class="card loading">
+      <div class="spinner"></div>
+      <p>AI is analyzing your resume...<br/>Please wait</p>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="mainContent" class="page" style="display:none;">
+
+    <!-- CANDIDATE NAME -->
+    <div class="card" style="text-align:center;">
+      <h2 style="font-size:24px;" id="candidateName">Loading...</h2>
+      <p style="color:#888;font-size:14px;" id="candidateEducation"></p>
+      <p style="color:#888;font-size:14px;" id="experienceLevel"></p>
+    </div>
+
+    <!-- MATCH PERCENTAGE + STATS -->
+    <div class="card">
+      <div class="match-circle" id="matchCircle">
+        <span class="percentage" id="matchPercent">0%</span>
+        <span class="label">Match</span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="number" id="skillsFound">0</div>
+          <div class="label">Skills Found</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="skillsGap">0</div>
+          <div class="label">Skills to Learn</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="card">
+      <div class="section-title">AI Summary</div>
+      <p id="aiSummary" style="color:#555;line-height:1.7;"></p>
+    </div>
+
+    <!-- CURRENT SKILLS -->
+    <div class="card">
+      <div class="section-title">✅ Skills You Have</div>
+      <div id="currentSkills"></div>
+    </div>
+
+    <!-- MISSING SKILLS -->
+    <div class="card">
+      <div class="section-title">❌ Skills You Need</div>
+      <div id="missingSkills"></div>
+    </div>
+
+    <!-- STRENGTHS -->
+    <div class="card">
+      <div class="section-title">💪 Your Strengths</div>
+      <div id="strengthsList"></div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px;">
+      <button class="btn btn-green" onclick="goToRoadmap()">
+        Get My Roadmap →
+      </button>
+      <button class="btn" onclick="goToInterview()">
+        Practice Interview 🎤
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // Load analysis data from localStorage
+    var analysisData = JSON.parse(localStorage.getItem('analysisData'));
+    var targetJob = localStorage.getItem('targetJob');
+
+    if (!analysisData) {
+      window.location.href = '/';
+    }
+
+    // Hide loading, show content
+    setTimeout(function() {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      displayAnalysis(analysisData);
+    }, 1500);
+
+    function displayAnalysis(data) {
+
+      // Candidate info
+      document.getElementById('candidateName')
+        .textContent = data.name || 'Your Analysis';
+      document.getElementById('candidateEducation')
+        .textContent = data.education || '';
+      document.getElementById('experienceLevel')
+        .textContent = 'Level: ' + (data.experience_level || 'Fresher');
+
+      // Match percentage
+      var match = data.match_percentage || 0;
+      document.getElementById('matchPercent')
+        .textContent = match + '%';
+
+      // Change color based on match
+      var circle = document.getElementById('matchCircle');
+      if (match >= 70) {
+        circle.style.background = '#00c896';
+      } else if (match >= 40) {
+        circle.style.background = '#f0a500';
+      } else {
+        circle.style.background = '#e05555';
+      }
+
+      // Stats
+      var currentSkills = data.current_skills || [];
+      var skillsGap = data.skills_gap || [];
+
+      document.getElementById('skillsFound')
+        .textContent = currentSkills.length;
+      document.getElementById('skillsGap')
+        .textContent = skillsGap.length;
+
+      // Summary
+      document.getElementById('aiSummary')
+        .textContent = data.summary || '';
+
+      // Current skills tags
+      var skillsHtml = '';
+      currentSkills.forEach(function(skill) {
+        skillsHtml += '<span class="skill-tag found">'
+          + skill + '</span>';
+      });
+      document.getElementById('currentSkills')
+        .innerHTML = skillsHtml;
+
+      // Missing skills tags
+      var missingHtml = '';
+      skillsGap.forEach(function(skill) {
+        missingHtml += '<span class="skill-tag missing">'
+          + skill + '</span>';
+      });
+      document.getElementById('missingSkills')
+        .innerHTML = missingHtml;
+
+      // Strengths
+      var strengthsHtml = '';
+      var strengths = data.strengths || [];
+      strengths.forEach(function(strength) {
+        strengthsHtml += '<span class="skill-tag">'
+          + strength + '</span>';
+      });
+      document.getElementById('strengthsList')
+        .innerHTML = strengthsHtml;
+    }
+
+    function goToRoadmap() {
+      // Save skills gap for roadmap page
+      localStorage.setItem('skillsGap',
+        JSON.stringify(analysisData.skills_gap));
+      window.location.href = '/roadmap-page';
+    }
+
+    function goToInterview() {
+      window.location.href = '/interview-page';
+    }
+  </script>
+
+</body>
+</html>

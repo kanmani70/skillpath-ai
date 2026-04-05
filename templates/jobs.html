@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Recommendations — SkillPath AI</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <style>
+    .job-card {
+      border: 1px solid #e0e4f0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 14px;
+      background: white;
+      transition: all 0.2s;
+    }
+    .job-card:hover {
+      border-color: #2d3a8c;
+      box-shadow: 0 4px 16px rgba(45,58,140,0.1);
+    }
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .job-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #2d3a8c;
+      margin-bottom: 4px;
+    }
+    .job-meta {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.8;
+    }
+    .match-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+    .skill-required {
+      display: inline-block;
+      background: #f0f4ff;
+      color: #2d3a8c;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      margin: 2px;
+    }
+    .apply-btn {
+      background: #2d3a8c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 12px;
+      margin-right: 8px;
+    }
+    .apply-btn:hover { background: #1e2a6e; }
+    .apply-btn.linkedin {
+      background: #0077b5;
+    }
+    .apply-btn.internshala {
+      background: #00c896;
+    }
+    .company-tag {
+      display: inline-block;
+      background: #fff8e0;
+      color: #b07d00;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin: 4px;
+    }
+    .tip-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      padding: 14px;
+      background: #f8f9ff;
+      border-radius: 10px;
+    }
+    .tip-number {
+      width: 28px;
+      height: 28px;
+      background: #2d3a8c;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .platform-card {
+      border: 1px solid #e0e4f0;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s;
+    }
+    .platform-card:hover {
+      border-color: #2d3a8c;
+      background: #f8f9ff;
+    }
+    .platform-card h4 {
+      font-size: 14px;
+      color: #2d3a8c;
+      margin-bottom: 4px;
+    }
+    .platform-card p {
+      font-size: 11px;
+      color: #888;
+      margin: 0;
+    }
+    .checklist-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f4ff;
+    }
+    .checklist-item label {
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+    }
+    .checklist-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .salary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .salary-table th {
+      background: #f0f4ff;
+      padding: 10px;
+      text-align: left;
+    }
+    .salary-table td {
+      padding: 10px;
+      border-bottom: 1px solid #f0f4ff;
+    }
+    .salary-table tr:nth-child(even) {
+      background: #fafafa;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #e0e4f0;
+      background: white;
+      color: #555;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: #2d3a8c;
+      color: white;
+      border-color: #2d3a8c;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="/" class="logo">SkillPath <span>AI</span></a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/roadmap-page">Roadmap</a>
+      <a href="/interview-page">Interview</a>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingScreen" class="page">
+    <div class="card loading">
+      <div class="spinner"></div>
+      <p>Finding best jobs for you...<br/>
+      <span style="font-size:12px;color:#aaa;">
+      Based on your skills and target role</span></p>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="mainContent" class="page" style="display:none;">
+
+    <!-- HEADER -->
+    <div class="card" style="text-align:center;
+    border:2px solid #00c896;">
+      <p style="font-size:36px;">🎉</p>
+      <h2 style="color:#00875a;margin-bottom:8px;">
+        Congratulations! You're Job Ready!
+      </h2>
+      <p style="color:#555;font-size:14px;line-height:1.6;">
+        You completed all topics and passed all quizzes.<br/>
+        Here are your personalized job recommendations.
+      </p>
+      <div style="margin-top:12px;">
+        <span style="background:#e8f0ff;color:#2d3a8c;
+        padding:8px 20px;border-radius:20px;font-size:14px;">
+          🎯 Target: <strong id="targetJobTitle"></strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="number" id="jobCount">0</div>
+        <div class="label">Jobs Found</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="topMatch">0%</div>
+        <div class="label">Top Match</div>
+      </div>
+    </div>
+
+    <!-- FILTER BUTTONS -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;
+    margin-bottom:16px;">
+      <button class="filter-btn active"
+      onclick="filterJobs('all', this)">All Jobs</button>
+      <button class="filter-btn"
+      onclick="filterJobs('high', this)">80%+ Match</button>
+      <button class="filter-btn"
+      onclick="filterJobs('product', this)">Product</button>
+      <button class="filter-btn"
+      onclick="filterJobs('service', this)">Service</button>
+      <button class="filter-btn"
+      onclick="filterJobs('startup', this)">Startup</button>
+      <button class="filter-btn"
+      onclick="filterJobs('remote', this)">Remote</button>
+    </div>
+
+    <!-- JOB LISTINGS -->
+    <div id="jobsList"></div>
+
+    <!-- TOP COMPANIES -->
+    <div class="card">
+      <div class="section-title">🏢 Top Companies to Target</div>
+      <div id="companiesList"
+      style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    </div>
+
+    <!-- WHERE TO APPLY -->
+    <div class="card">
+      <div class="section-title">🌐 Where to Apply in India</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;
+      gap:12px;">
+        <a href="https://www.naukri.com" target="_blank"
+        class="platform-card">
+          <h4>🔍 Naukri.com</h4>
+          <p>Best for all fresher jobs in India</p>
+        </a>
+        <a href="https://www.linkedin.com/jobs" target="_blank"
+        class="platform-card">
+          <h4>💼 LinkedIn Jobs</h4>
+          <p>Best for software and professional roles</p>
+        </a>
+        <a href="https://internshala.com" target="_blank"
+        class="platform-card">
+          <h4>🎓 Internshala</h4>
+          <p>Internships and fresher jobs</p>
+        </a>
+        <a href="https://www.instahyre.com" target="_blank"
+        class="platform-card">
+          <h4>⚡ Instahyre</h4>
+          <p>Startup and product companies</p>
+        </a>
+        <a href="https://www.hirist.tech" target="_blank"
+        class="platform-card">
+          <h4>💻 Hirist</h4>
+          <p>Tech roles specifically</p>
+        </a>
+        <a href="https://wellfound.com" target="_blank"
+        class="platform-card">
+          <h4>🚀 Wellfound</h4>
+          <p>Global startup jobs</p>
+        </a>
+        <a href="https://www.freshersworld.com" target="_blank"
+        class="platform-card">
+          <h4>🌟 FreshersWorld</h4>
+          <p>Specifically for freshers</p>
+        </a>
+        <a href="https://unstop.com" target="_blank"
+        class="platform-card">
+          <h4>🏆 Unstop</h4>
+          <p>Competitions and fresher hiring</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- APPLICATION TIPS -->
+    <div class="card">
+      <div class="section-title">📋 How to Apply Smart</div>
+      <div id="tipsList"></div>
+    </div>
+
+    <!-- SALARY GUIDE -->
+    <div class="card">
+      <div class="section-title">
+        💰 Salary Guide for Freshers in India 2024
+      </div>
+      <table class="salary-table">
+        <tr>
+          <th>Role</th>
+          <th>Expected CTC</th>
+          <th>Demand</th>
+        </tr>
+        <tr>
+          <td>Software Developer</td>
+          <td>3.5 — 6 LPA</td>
+          <td>🔥 Very High</td>
+        </tr>
+        <tr>
+          <td>Frontend Developer</td>
+          <td>3 — 5 LPA</td>
+          <td>📈 High</td>
+        </tr>
+        <tr>
+          <td>Full Stack Developer</td>
+          <td>4 — 8 LPA</td>
+          <td>🔥 Very High</td>
+        </tr>
+        <tr>
+          <td>Data Analyst</td>
+          <td>3.5 — 6 LPA</td>
+          <td>🔥 Very High</td>
+        </tr>
+        <tr>
+          <td>Software Tester</td>
+          <td>2.5 — 4 LPA</td>
+          <td>✅ Stable</td>
+        </tr>
+        <tr>
+          <td>DevOps Engineer</td>
+          <td>4 — 7 LPA</td>
+          <td>📈 High</td>
+        </tr>
+        <tr>
+          <td>Business Analyst</td>
+          <td>3 — 5 LPA</td>
+          <td>📈 High</td>
+        </tr>
+        <tr>
+          <td>HR Executive</td>
+          <td>2 — 3.5 LPA</td>
+          <td>✅ Stable</td>
+        </tr>
+        <tr>
+          <td>Accountant</td>
+          <td>2 — 4 LPA</td>
+          <td>✅ Stable</td>
+        </tr>
+        <tr>
+          <td>Content Writer</td>
+          <td>2 — 3.5 LPA</td>
+          <td>📈 High</td>
+        </tr>
+        <tr>
+          <td>Digital Marketing</td>
+          <td>2.5 — 4 LPA</td>
+          <td>📈 High</td>
+        </tr>
+        <tr>
+          <td>Embedded Engineer</td>
+          <td>3 — 5 LPA</td>
+          <td>✅ Stable</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- RESUME CHECKLIST -->
+    <div class="card">
+      <div class="section-title">
+        📄 Resume Checklist Before Applying
+      </div>
+      <div id="checklist"></div>
+      <div style="margin-top:14px;text-align:center;">
+        <span id="checklistScore" style="font-size:13px;
+        color:#888;">0 of 10 items checked</span>
+      </div>
+    </div>
+
+    <!-- BOTTOM BUTTONS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;
+    gap:16px;margin-bottom:40px;">
+      <a href="/roadmap-page" class="btn"
+      style="text-align:center;">
+        ← Back to Roadmap
+      </a>
+      <a href="/interview-page" class="btn btn-green"
+      style="text-align:center;">
+        Practice Interview 🎤
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    var targetJob = localStorage.getItem('targetJob')
+      || 'Software Developer';
+    var analysisData = JSON.parse(
+      localStorage.getItem('analysisData') || '{}');
+    var skills = analysisData.current_skills || [];
+    var allJobs = [];
+
+    document.getElementById('targetJobTitle').textContent = targetJob;
+
+    // Resume checklist
+    var checklistItems = [
+      'Add your SkillPath AI project with live link',
+      'Include your GitHub profile URL',
+      'Keep resume to exactly 1 page',
+      'Add LinkedIn profile link',
+      'List all skills learned in roadmap',
+      'Include personal projects you built',
+      'Add email and phone number clearly',
+      'Use simple clean format — no heavy design',
+      'Proofread for spelling mistakes',
+      'Save as PDF before sending'
+    ];
+
+    var checklistHtml = '';
+    checklistItems.forEach(function(item, i) {
+      checklistHtml +=
+        '<div class="checklist-item">' +
+        '<input type="checkbox" id="check-' + i + '" ' +
+        'onchange="updateChecklistScore()">' +
+        '<label for="check-' + i + '">' + item + '</label>' +
+        '</div>';
+    });
+    document.getElementById('checklist').innerHTML = checklistHtml;
+
+    function updateChecklistScore() {
+      var checked = document.querySelectorAll(
+        '#checklist input:checked').length;
+      var total = checklistItems.length;
+      document.getElementById('checklistScore').textContent
+        = checked + ' of ' + total + ' items checked';
+      if (checked === total) {
+        document.getElementById('checklistScore').textContent
+          = '✅ All done! You are ready to apply!';
+        document.getElementById('checklistScore').style.color
+          = '#00875a';
+      }
+    }
+
+    // Generate apply links for ANY job role
+    function generateApplyLink(jobTitle, platform) {
+      var query = encodeURIComponent(
+        jobTitle + ' fresher 0-1 years India');
+      if (platform === 'naukri') {
+        return 'https://www.naukri.com/jobs-in-india?k='
+          + encodeURIComponent(jobTitle + ' fresher');
+      } else if (platform === 'linkedin') {
+        return 'https://www.linkedin.com/jobs/search/?keywords='
+          + query + '&location=India';
+      } else {
+        return 'https://internshala.com/jobs/keywords-'
+          + encodeURIComponent(jobTitle.toLowerCase()
+          .replace(/ /g, '-'));
+      }
+    }
+
+    // Filter jobs
+    function filterJobs(filter, btn) {
+      document.querySelectorAll('.filter-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+
+      var filtered = allJobs;
+      if (filter === 'high') {
+        filtered = allJobs.filter(function(j) {
+          return (j.match_percentage || 0) >= 80;
+        });
+      } else if (filter === 'product') {
+        filtered = allJobs.filter(function(j) {
+          return (j.company_type || '').toLowerCase()
+            .includes('product');
+        });
+      } else if (filter === 'service') {
+        filtered = allJobs.filter(function(j) {
+          return (j.company_type || '').toLowerCase()
+            .includes('service');
+        });
+      } else if (filter === 'startup') {
+        filtered = allJobs.filter(function(j) {
+          return (j.company_type || '').toLowerCase()
+            .includes('startup');
+        });
+      } else if (filter === 'remote') {
+        filtered = allJobs.filter(function(j) {
+          return (j.location || '').toLowerCase()
+            .includes('remote');
+        });
+      }
+
+      renderJobs(filtered);
+    }
+
+    function renderJobs(jobs) {
+      if (jobs.length === 0) {
+        document.getElementById('jobsList').innerHTML
+          = '<div class="card" style="text-align:center;">' +
+          '<p style="color:#888;">No jobs found for this filter.' +
+          ' Try another filter.</p></div>';
+        return;
+      }
+
+      var html = '';
+      jobs.forEach(function(job) {
+        var match = job.match_percentage || 0;
+        var matchColor = match >= 80 ? '#00875a' :
+          (match >= 60 ? '#f0a500' : '#e05555');
+        var matchBg = match >= 80 ? '#e8fff6' :
+          (match >= 60 ? '#fff8e0' : '#fff5f5');
+
+        var skillTags = '';
+        (job.skills_required || []).forEach(function(s) {
+          skillTags += '<span class="skill-required">' +
+            s + '</span>';
+        });
+
+        html += '<div class="job-card">' +
+          '<div class="job-header">' +
+          '<div>' +
+          '<div class="job-title">' + job.title + '</div>' +
+          '<div class="job-meta">' +
+          '📍 ' + (job.location || 'India') +
+          '&nbsp;|&nbsp; 💰 ' + (job.salary || '3-5 LPA') +
+          '<br/>🏢 ' + (job.company_type || 'IT Company') +
+          '&nbsp;|&nbsp; ⏱ ' + (job.experience || 'Fresher') +
+          '</div></div>' +
+          '<span class="match-pill" style="color:' + matchColor +
+          ';border-color:' + matchColor + ';background:' +
+          matchBg + ';">' + match + '% match</span>' +
+          '</div>' +
+          '<div style="margin:10px 0;">' + skillTags + '</div>' +
+          '<div style="background:#fff8e0;border-radius:8px;' +
+          'padding:10px;">' +
+          '<p style="font-size:12px;color:#b07d00;margin:0;">' +
+          '💡 ' + (job.tips || 'Highlight your projects') +
+          '</p></div>' +
+          '<div style="margin-top:12px;">' +
+          '<a href="' + generateApplyLink(job.title, 'naukri') +
+          '" target="_blank" class="apply-btn">Apply on Naukri →</a>' +
+          '<a href="' + generateApplyLink(job.title, 'linkedin') +
+          '" target="_blank" class="apply-btn linkedin">' +
+          'Apply on LinkedIn →</a>' +
+          '</div></div>';
+      });
+
+      document.getElementById('jobsList').innerHTML = html;
+    }
+
+    function displayJobs(data) {
+      allJobs = data.jobs || [];
+
+      document.getElementById('jobCount').textContent = allJobs.length;
+
+      if (allJobs.length > 0) {
+        var topMatch = Math.max.apply(null,
+          allJobs.map(function(j) {
+            return j.match_percentage || 0;
+          }));
+        document.getElementById('topMatch').textContent
+          = topMatch + '%';
+      }
+
+      renderJobs(allJobs);
+
+      // Companies
+      var companiesHtml = '';
+      (data.top_companies || []).forEach(function(company) {
+        companiesHtml += '<span class="company-tag">' +
+          company + '</span>';
+      });
+      document.getElementById('companiesList').innerHTML
+        = companiesHtml;
+
+      // Tips
+      var tipsHtml = '';
+      (data.application_tips || []).forEach(function(tip, i) {
+        tipsHtml += '<div class="tip-item">' +
+          '<div class="tip-number">' + (i + 1) + '</div>' +
+          '<p style="font-size:13px;color:#333;margin:0;' +
+          'line-height:1.6;">' + tip + '</p></div>';
+      });
+      document.getElementById('tipsList').innerHTML = tipsHtml;
+    }
+
+    // Fetch jobs
+    fetch('/get-jobs', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        target_job: targetJob,
+        skills: skills
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      displayJobs(data);
+    })
+    .catch(function() {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      displayJobs({
+        jobs: [],
+        top_companies: ['TCS', 'Infosys', 'Wipro', 'HCL'],
+        application_tips: [
+          'Apply to 5 companies every day',
+          'Customize resume for each role',
+          'Follow up after 1 week'
+        ]
+      });
+    });
+  </script>
+
+</body>
+</html>

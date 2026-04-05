@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roadmap — SkillPath AI</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <style>
+    .roadmap-item {
+      border: 1px solid #e0e4f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: all 0.3s;
+    }
+    .roadmap-item.locked {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .roadmap-item.completed {
+      border-color: #00c896;
+      background: #f0fff8;
+    }
+    .roadmap-item.active {
+      border-color: #2d3a8c;
+      background: #f8f9ff;
+    }
+    .roadmap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .badge-locked {
+      background: #f0f0f0;
+      color: #888;
+    }
+    .badge-active {
+      background: #e8f0ff;
+      color: #2d3a8c;
+    }
+    .badge-done {
+      background: #e8fff6;
+      color: #00875a;
+    }
+    .quiz-box {
+      background: #f8f9ff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 14px;
+      display: none;
+    }
+    .quiz-question {
+      font-size: 15px;
+      color: #2d3a8c;
+      font-weight: 500;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .quiz-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border: 1px solid #e0e4f0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      transition: all 0.2s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .quiz-option:hover {
+      border-color: #2d3a8c;
+      background: #f0f4ff;
+    }
+    .quiz-option.correct {
+      background: #e8fff6;
+      border-color: #00c896;
+      color: #00875a;
+    }
+    .quiz-option.wrong {
+      background: #fff5f5;
+      border-color: #e05555;
+      color: #e05555;
+    }
+    .quiz-option.disabled {
+      pointer-events: none;
+    }
+    .timer-bar {
+      height: 6px;
+      background: #e0e4f0;
+      border-radius: 3px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .timer-fill {
+      height: 6px;
+      background: #2d3a8c;
+      border-radius: 3px;
+      transition: width 1s linear;
+    }
+    .quiz-result {
+      text-align: center;
+      padding: 16px;
+      border-radius: 10px;
+      margin-top: 14px;
+      display: none;
+    }
+    .quiz-result.pass {
+      background: #e8fff6;
+      border: 1px solid #00c896;
+    }
+    .quiz-result.fail {
+      background: #fff5f5;
+      border: 1px solid #e05555;
+    }
+    .overall-progress {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .explanation-box {
+      background: #fff8e0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #b07d00;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="/" class="logo">SkillPath <span>AI</span></a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/roadmap-page">Roadmap</a>
+      <a href="/interview-page">Interview</a>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="card" style="text-align:center;">
+      <h2>Your Personal Learning Roadmap</h2>
+      <p style="color:#888;font-size:14px;">
+        Target: <strong id="targetJobTitle"></strong>
+      </p>
+      <div style="margin-top:12px;">
+        <span style="background:#e8fff6;color:#00875a;
+        padding:8px 20px;border-radius:20px;font-size:14px;">
+          Total: <strong id="totalDays"></strong> days to job-ready
+        </span>
+      </div>
+    </div>
+
+    <!-- OVERALL PROGRESS -->
+    <div class="overall-progress">
+      <div class="progress-text">
+        <span>Overall Progress</span>
+        <span id="progressText">0 of 0 topics completed</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="overallProgress"
+        style="width:0%;background:#00c896;"></div>
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="card">
+      <div class="section-title">💡 How This Works</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;
+      gap:12px;">
+        <div style="background:#f8f9ff;border-radius:8px;padding:12px;">
+          <p style="font-size:13px;color:#2d3a8c;font-weight:500;">
+            📚 Step 1</p>
+          <p style="font-size:12px;color:#555;">
+            Study the topic using the free resource link</p>
+        </div>
+        <div style="background:#f8f9ff;border-radius:8px;padding:12px;">
+          <p style="font-size:13px;color:#2d3a8c;font-weight:500;">
+            ✅ Step 2</p>
+          <p style="font-size:12px;color:#555;">
+            Take the quiz — score 70%+ to unlock next topic</p>
+        </div>
+        <div style="background:#f8f9ff;border-radius:8px;padding:12px;">
+          <p style="font-size:13px;color:#2d3a8c;font-weight:500;">
+            🔓 Step 3</p>
+          <p style="font-size:12px;color:#555;">
+            Complete all topics to unlock job recommendations</p>
+        </div>
+        <div style="background:#f8f9ff;border-radius:8px;padding:12px;">
+          <p style="font-size:13px;color:#2d3a8c;font-weight:500;">
+            💼 Step 4</p>
+          <p style="font-size:12px;color:#555;">
+            Get matched with real jobs based on your skills</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROADMAP ITEMS -->
+    <div id="roadmapContainer"></div>
+
+    <!-- LOCKED JOB BUTTON -->
+    <div class="card" id="jobsLockedCard" style="text-align:center;">
+      <p style="font-size:16px;">🔒</p>
+      <h3 style="color:#888;font-size:16px;margin-bottom:8px;">
+        Job Recommendations Locked
+      </h3>
+      <p style="color:#aaa;font-size:13px;">
+        Complete all topics and pass their quizzes to unlock
+      </p>
+      <div class="progress-bar" style="margin-top:12px;">
+        <div class="progress-fill" id="jobUnlockProgress"
+        style="width:0%;background:#2d3a8c;"></div>
+      </div>
+    </div>
+
+    <!-- UNLOCKED JOB BUTTON -->
+    <div id="jobsUnlockedCard" style="display:none;
+    margin-bottom:40px;">
+      <div class="card" style="text-align:center;
+      border:2px solid #00c896;">
+        <p style="font-size:30px;">🎉</p>
+        <h3 style="color:#00875a;margin-bottom:8px;">
+          Congratulations! You're Job Ready!
+        </h3>
+        <p style="color:#555;font-size:14px;margin-bottom:20px;">
+          You have completed all topics and passed all quizzes.
+          Your job recommendations are now unlocked!
+        </p>
+        <button class="btn btn-green btn-full"
+        onclick="goToJobs()" style="font-size:16px;padding:16px;">
+          🚀 View My Job Recommendations →
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Prevent copy paste
+    document.addEventListener('copy', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('paste', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('cut', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) &&
+          ['c','v','x','a'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    });
+
+    var targetJob = localStorage.getItem('targetJob')
+      || 'Software Developer';
+    var skillsGap = JSON.parse(
+      localStorage.getItem('skillsGap') || '[]');
+    var completedTopics = JSON.parse(
+      localStorage.getItem('completedTopics') || '[]');
+    var roadmapData = null;
+    var currentQuizTopic = null;
+    var quizQuestions = [];
+    var currentQuestionIndex = 0;
+    var correctAnswers = 0;
+    var timerInterval = null;
+    var timeLeft = 30;
+
+    document.getElementById('targetJobTitle').textContent = targetJob;
+
+    if (skillsGap.length === 0) {
+      skillsGap = ['Python', 'SQL', 'Git'];
+    }
+
+    // Load roadmap
+    fetch('/roadmap', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        skills_gap: skillsGap,
+        target_job: targetJob
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      roadmapData = data;
+      document.getElementById('totalDays').textContent
+        = data.total_days || 21;
+      renderRoadmap(data.roadmap || []);
+      updateProgress();
+    })
+    .catch(function() {
+      document.getElementById('roadmapContainer').innerHTML
+        = '<div class="card"><p>Error loading roadmap. Please go back and try again.</p></div>';
+    });
+
+    function renderRoadmap(roadmap) {
+      var html = '';
+      roadmap.forEach(function(item, index) {
+        var isCompleted = completedTopics.includes(index);
+        var isActive = index === 0 ||
+          completedTopics.includes(index - 1);
+        var statusClass = isCompleted ? 'completed' :
+          (isActive ? 'active' : 'locked');
+        var badgeClass = isCompleted ? 'badge-done' :
+          (isActive ? 'badge-active' : 'badge-locked');
+        var badgeText = isCompleted ? '✅ Completed' :
+          (isActive ? '📖 Study Now' : '🔒 Locked');
+
+        html += '<div class="roadmap-item ' + statusClass +
+          '" id="topic-' + index + '">' +
+          '<div class="roadmap-header">' +
+          '<div style="display:flex;gap:12px;align-items:center;">' +
+          '<div class="day-badge">' + item.days + '</div>' +
+          '<div>' +
+          '<h4 style="font-size:15px;color:#333;margin-bottom:2px;">' +
+          item.skill + '</h4>' +
+          '<p style="font-size:12px;color:#888;margin:0;">' +
+          item.topic + '</p>' +
+          '</div></div>' +
+          '<span class="status-badge ' + badgeClass + '">' +
+          badgeText + '</span>' +
+          '</div>';
+
+        if (!isCompleted && isActive) {
+          html += '<div style="margin-top:12px;">' +
+            '<a href="' + item.resource_url +
+            '" target="_blank" style="color:#00c896;font-size:13px;">' +
+            '📚 Study: ' + item.resource_name + ' →</a>' +
+            '</div>' +
+            '<button onclick="startQuiz(' + index + ')" ' +
+            'class="btn btn-full" ' +
+            'style="margin-top:12px;font-size:13px;padding:12px;">' +
+            '✏️ Take Quiz to Unlock Next Topic' +
+            '</button>';
+
+          html += '<div class="quiz-box" id="quiz-' + index + '">' +
+            '<div id="quiz-content-' + index + '"></div>' +
+            '</div>';
+        }
+
+        if (isCompleted) {
+          html += '<div style="margin-top:8px;">' +
+            '<p style="font-size:13px;color:#00875a;">' +
+            '✅ Quiz passed! Topic completed.</p>' +
+            '</div>';
+        }
+
+        html += '</div>';
+      });
+
+      document.getElementById('roadmapContainer').innerHTML = html;
+    }
+
+    function startQuiz(topicIndex) {
+      var roadmap = roadmapData.roadmap || [];
+      var topic = roadmap[topicIndex];
+      currentQuizTopic = topicIndex;
+      currentQuestionIndex = 0;
+      correctAnswers = 0;
+      quizQuestions = [];
+
+      var quizBox = document.getElementById('quiz-' + topicIndex);
+      var content = document.getElementById(
+        'quiz-content-' + topicIndex);
+      quizBox.style.display = 'block';
+      content.innerHTML = '<div style="text-align:center;padding:20px;">' +
+        '<div class="spinner"></div>' +
+        '<p style="color:#888;margin-top:10px;">Loading quiz questions...</p></div>';
+
+      fetch('/quiz', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          skill: topic.skill,
+          topic: topic.topic
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        quizQuestions = data.questions || [];
+        showQuestion(topicIndex);
+      })
+      .catch(function() {
+        content.innerHTML = '<p style="color:#e05555;">Error loading quiz. Please try again.</p>';
+      });
+    }
+
+    function showQuestion(topicIndex) {
+      if (currentQuestionIndex >= quizQuestions.length) {
+        showQuizResult(topicIndex);
+        return;
+      }
+
+      var q = quizQuestions[currentQuestionIndex];
+      var content = document.getElementById(
+        'quiz-content-' + topicIndex);
+
+      var optionsHtml = '';
+      q.options.forEach(function(opt, i) {
+        optionsHtml += '<button class="quiz-option" ' +
+          'onclick="selectOption(this,' + i + ',' +
+          q.correct + ',\'' + topicIndex + '\',' +
+          currentQuestionIndex + ')">' +
+          opt + '</button>';
+      });
+
+      content.innerHTML =
+        '<p style="font-size:12px;color:#888;margin-bottom:8px;">' +
+        'Question ' + (currentQuestionIndex + 1) + ' of ' +
+        quizQuestions.length + ' — Score 70%+ to pass</p>' +
+        '<div class="timer-bar">' +
+        '<div class="timer-fill" id="timerBar" style="width:100%;">' +
+        '</div></div>' +
+        '<p id="timerText" style="font-size:12px;color:#888;' +
+        'margin-bottom:10px;">⏱ 30 seconds</p>' +
+        '<div class="quiz-question">' + q.question + '</div>' +
+        optionsHtml +
+        '<div class="explanation-box" id="explanation-' +
+        topicIndex + '"></div>';
+
+      startTimer(topicIndex);
+    }
+
+    function startTimer(topicIndex) {
+      clearInterval(timerInterval);
+      timeLeft = 30;
+
+      timerInterval = setInterval(function() {
+        timeLeft--;
+        var pct = (timeLeft / 30) * 100;
+        var bar = document.getElementById('timerBar');
+        var txt = document.getElementById('timerText');
+        if (bar) bar.style.width = pct + '%';
+        if (bar && timeLeft <= 10) bar.style.background = '#e05555';
+        if (txt) txt.textContent = '⏱ ' + timeLeft + ' seconds';
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          // Auto move to next question
+          currentQuestionIndex++;
+          showQuestion(topicIndex);
+        }
+      }, 1000);
+    }
+
+    function selectOption(btn, selected, correct, topicIndex, qIndex) {
+      clearInterval(timerInterval);
+
+      // Disable all options
+      var options = document.querySelectorAll('.quiz-option');
+      options.forEach(function(opt) {
+        opt.classList.add('disabled');
+      });
+
+      // Show correct/wrong
+      if (selected === correct) {
+        btn.classList.add('correct');
+        correctAnswers++;
+      } else {
+        btn.classList.add('wrong');
+        options[correct].classList.add('correct');
+      }
+
+      // Show explanation
+      var exp = document.getElementById('explanation-' + topicIndex);
+      if (exp) {
+        exp.style.display = 'block';
+        exp.textContent = '💡 ' +
+          (quizQuestions[qIndex].explanation || '');
+      }
+
+      // Move to next after 2 seconds
+      setTimeout(function() {
+        currentQuestionIndex++;
+        showQuestion(parseInt(topicIndex));
+      }, 2000);
+    }
+
+    function showQuizResult(topicIndex) {
+      clearInterval(timerInterval);
+      var total = quizQuestions.length;
+      var score = Math.round((correctAnswers / total) * 100);
+      var passed = score >= 70;
+
+      var content = document.getElementById(
+        'quiz-content-' + topicIndex);
+
+      if (passed) {
+        // Save completed topic
+        if (!completedTopics.includes(topicIndex)) {
+          completedTopics.push(topicIndex);
+          localStorage.setItem('completedTopics',
+            JSON.stringify(completedTopics));
+        }
+
+        content.innerHTML =
+          '<div style="text-align:center;padding:20px;' +
+          'background:#e8fff6;border-radius:10px;">' +
+          '<p style="font-size:30px;">🎉</p>' +
+          '<h3 style="color:#00875a;">You Passed!</h3>' +
+          '<p style="color:#555;font-size:14px;">Score: ' +
+          correctAnswers + '/' + total + ' (' + score + '%)</p>' +
+          '<p style="color:#555;font-size:13px;">Next topic unlocked!</p>' +
+          '</div>';
+
+        setTimeout(function() {
+          renderRoadmap(roadmapData.roadmap || []);
+          updateProgress();
+        }, 1500);
+
+      } else {
+        content.innerHTML =
+          '<div style="text-align:center;padding:20px;' +
+          'background:#fff5f5;border-radius:10px;">' +
+          '<p style="font-size:30px;">😔</p>' +
+          '<h3 style="color:#e05555;">Not Passed</h3>' +
+          '<p style="color:#555;font-size:14px;">Score: ' +
+          correctAnswers + '/' + total + ' (' + score + '%)</p>' +
+          '<p style="color:#555;font-size:13px;">' +
+          'You need 70% to pass. Study more and try again!</p>' +
+          '<button class="btn" style="margin-top:14px;" ' +
+          'onclick="retryQuiz(' + topicIndex + ')">🔄 Try Again</button>' +
+          '</div>';
+      }
+    }
+
+    function retryQuiz(topicIndex) {
+      startQuiz(topicIndex);
+    }
+
+    function updateProgress() {
+      var total = roadmapData ?
+        (roadmapData.roadmap || []).length : 0;
+      var completed = completedTopics.length;
+      var pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      document.getElementById('progressText').textContent
+        = completed + ' of ' + total + ' topics completed';
+      document.getElementById('overallProgress').style.width
+        = pct + '%';
+      document.getElementById('jobUnlockProgress').style.width
+        = pct + '%';
+
+      if (completed >= total && total > 0) {
+        document.getElementById('jobsLockedCard').style.display
+          = 'none';
+        document.getElementById('jobsUnlockedCard').style.display
+          = 'block';
+      }
+    }
+
+    function goToJobs() {
+      window.location.href = '/jobs';
+    }
+  </script>
+
+</body>
+</html>
